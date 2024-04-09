@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "841892669443",
+    "project_id": "ubixstar-f526f",
+    "storage_bucket": "ubixstar-f526f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841892669443:android:15aeba5aee67a420150636",
+        "android_client_info": {
+          "package_name": "com.example.ubixstar_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4iLjQkOvvcxxfxg3Av3DDRgZ1oHPzX1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
