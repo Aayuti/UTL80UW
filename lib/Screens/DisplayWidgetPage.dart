@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,7 @@ class DisplayWidget extends StatefulWidget {
 class _DisplayWidgetState extends State<DisplayWidget> {
   TextEditingController _selectedText = TextEditingController();
   late File _selectedFile;
+  bool isVisible = false;
 
   void initState() {
     super.initState();
@@ -55,6 +57,16 @@ class _DisplayWidgetState extends State<DisplayWidget> {
         await FirebaseFirestore.instance.collection('text data').add({
           'image url': downloadUrl,
         });
+
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //       'Image uploaded',
+        //       style: TextStyle(color: Color.fromARGB(255, 61, 115, 63)),
+        //     ),
+        //     backgroundColor: const Color.fromARGB(255, 173, 255, 176),
+        //   ),
+        // );
 
         showDialog(
             context: context,
@@ -98,56 +110,120 @@ class _DisplayWidgetState extends State<DisplayWidget> {
   @override
   Widget build(BuildContext context) {
     Widget content;
+    // bool isVisible = false;
+
     if (widget.options['Image Widget'] == true &&
         widget.options['Button Widget'] == true &&
         widget.options['Text Widget'] == false) {
       content = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextFormField(
-              decoration:
-                  InputDecoration(labelText: 'File url will appear here'),
-              readOnly: true,
-              controller: TextEditingController(text: _selectedFile.path),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _selectedFile.path.isNotEmpty
-                ? Container(
-                    height: 200, // Adjust height as needed
-                    width: MediaQuery.of(context).size.width,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: _selectedFile.path.startsWith('http')
-                          ? Image.network(_selectedFile.path)
-                          : Image.file(_selectedFile),
+          // Textfield
+          Container(
+            height: 600,
+            width: 350,
+            color: Color.fromARGB(255, 212, 251, 214),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    height: 250,
+                    width: 250,
+                    color: const Color.fromARGB(255, 212, 204, 204),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 25),
+                          child: Text('Upload image'),
+                        ),
+                        Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              height: 150,
+                              width: 250,
+                              color: Color.fromARGB(255, 212, 204, 204),
+                              child: _selectedFile.path.isNotEmpty
+                                  ? Container(
+                                      height: 200, // Adjust height as needed
+                                      width: MediaQuery.of(context).size.width,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: _selectedFile.path
+                                                .startsWith('http')
+                                            ? Image.network(_selectedFile.path)
+                                            : Image.file(_selectedFile),
+                                      ),
+                                    )
+                                  : null,
+                            )),
+                      ],
                     ),
-                  )
-                : Text('No image selected'),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: _selectFile,
-                child: Text('Select File'),
-              ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 212, 251, 214),
+                          elevation: 0,
+                          foregroundColor: Color.fromARGB(255, 212, 251, 214)),
+                      onPressed: _selectFile,
+                      child: Text('Select File'),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SizedBox(
+                    height: 50,
+                    width: 100,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 167, 254, 167),
+                        foregroundColor: Colors.black,
+                        shape: const RoundedRectangleBorder(
+                          // Use RoundedRectangleBorder for sharp corners
+                          borderRadius: BorderRadius
+                              .zero, // Set borderRadius to zero for sharp edges
+                        ),
+                        side: const BorderSide(color: Colors.black, width: 1.0),
+                      ),
+                      onPressed: _saveImage,
+                      child: Text('Save'),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Center(
+          Padding(
+            padding: EdgeInsets.all(32.0),
             child: SizedBox(
+              width: 200,
               height: 50,
-              width: 150,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 205, 237, 205),
-                  foregroundColor: Colors.black,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 1),
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
-                onPressed: _saveImage,
-                child: Text('Save'),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SelectPage(),
+                      ),
+                    );
+                  },
+                  backgroundColor: const Color.fromARGB(255, 177, 224, 179),
+                  foregroundColor: Colors.black,
+                  child: const Text(
+                    'Add widget',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ),
           ),
@@ -156,151 +232,55 @@ class _DisplayWidgetState extends State<DisplayWidget> {
     } else if (widget.options['Image Widget'] == false &&
         widget.options['Button Widget'] == true &&
         widget.options['Text Widget'] == true) {
-      content = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextFormField(
-              decoration: const InputDecoration(labelText: 'Enter text'),
-              controller: _selectedText,
-            ),
-          ),
-          Center(
-            child: SizedBox(
-              height: 50,
-              width: 150,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 205, 237, 205),
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: _saveData,
-                child: Text('Save'),
-              ),
-            ),
-          ),
-        ],
-      );
-    } else if (widget.options['Text Widget'] == true &&
-        widget.options['Image Widget'] == true &&
-        widget.options['Button Widget'] == true) {
-      content = Column(
-        children: [
-          // Textfield
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextFormField(
-              decoration: const InputDecoration(labelText: 'Enter text'),
-              controller: _selectedText,
-            ),
-          ),
-          // Image url textfield
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextFormField(
-              decoration:
-                  InputDecoration(labelText: 'File url will appear here'),
-              readOnly: true,
-              controller: TextEditingController(text: _selectedFile.path),
-            ),
-          ),
-
-          //to display image
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _selectedFile.path.isNotEmpty
-                ? Container(
-                    height: 200, // Adjust height as needed
-                    width: MediaQuery.of(context).size.width,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: _selectedFile.path.startsWith('http')
-                          ? Image.network(_selectedFile.path)
-                          : Image.file(_selectedFile),
-                    ),
-                  )
-                : Text('No image selected'),
-          ),
-          //select file button
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: _selectFile,
-                child: Text('Select File'),
-              ),
-            ),
-          ),
-          //save text button
-          Center(
-            child: SizedBox(
-              height: 50,
-              width: 150,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 205, 237, 205),
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: _saveData,
-                child: Text('Save text'),
-              ),
-            ),
-          ),
-          //save image button
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: SizedBox(
-                height: 50,
-                width: 150,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 205, 237, 205),
-                    foregroundColor: Colors.black,
-                  ),
-                  onPressed: _saveImage,
-                  child: Text('Save image'),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      content = Center(
+      content = SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 50,
-              width: 150,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 205, 237, 205),
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Error'),
-                        content:
-                            Text('At least one widget needs to be selected.'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('OK'),
+            // Textfield
+            Container(
+              height: 600,
+              width: 350,
+              color: Color.fromARGB(255, 212, 251, 214),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      height: 50,
+                      width: 250,
+                      color: const Color.fromARGB(255, 212, 204, 204),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10, left: 5),
+                        child: TextFormField(
+                          decoration:
+                              const InputDecoration(hintText: 'Enter text'),
+                          controller: _selectedText,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 250, bottom: 0),
+                    child: SizedBox(
+                      height: 50,
+                      width: 100,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 167, 254, 167),
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            // Use RoundedRectangleBorder for sharp corners
+                            borderRadius: BorderRadius
+                                .zero, // Set borderRadius to zero for sharp edges
                           ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Text('Save'),
+                          side:
+                              const BorderSide(color: Colors.black, width: 1.0),
+                        ),
+                        onPressed: _saveData,
+                        child: Text('Save'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -316,10 +296,208 @@ class _DisplayWidgetState extends State<DisplayWidget> {
                   child: FloatingActionButton(
                     onPressed: () {
                       Navigator.pop(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SelectPage(),
-                          ));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SelectPage(),
+                        ),
+                      );
+                    },
+                    backgroundColor: const Color.fromARGB(255, 177, 224, 179),
+                    foregroundColor: Colors.black,
+                    child: const Text(
+                      'Add widget',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (widget.options['Text Widget'] == true &&
+        widget.options['Image Widget'] == true &&
+        widget.options['Button Widget'] == true) {
+      content = Column(
+        children: [
+          // Textfield
+          Container(
+            height: 600,
+            width: 350,
+            color: Color.fromARGB(255, 212, 251, 214),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    height: 50,
+                    width: 250,
+                    color: const Color.fromARGB(255, 212, 204, 204),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        decoration: const InputDecoration(
+                            hintText: 'Enter text', border: InputBorder.none),
+                        controller: _selectedText,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    height: 250,
+                    width: 250,
+                    color: const Color.fromARGB(255, 212, 204, 204),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 15),
+                          child: Text('Upload image'),
+                        ),
+                        Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              height: 150,
+                              width: 250,
+                              color: Color.fromARGB(255, 212, 204, 204),
+                              child: _selectedFile.path.isNotEmpty
+                                  ? Container(
+                                      height: 200, // Adjust height as needed
+                                      width: MediaQuery.of(context).size.width,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: _selectedFile.path
+                                                .startsWith('http')
+                                            ? Image.network(_selectedFile.path)
+                                            : Image.file(_selectedFile),
+                                      ),
+                                    )
+                                  : null,
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 212, 251, 214),
+                          elevation: 0,
+                          foregroundColor: Color.fromARGB(255, 212, 251, 214)),
+                      onPressed: _selectFile,
+                      child: Text('Select File'),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SizedBox(
+                    height: 50,
+                    width: 100,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 167, 254, 167),
+                        foregroundColor: Colors.black,
+                        shape: const RoundedRectangleBorder(
+                          // Use RoundedRectangleBorder for sharp corners
+                          borderRadius: BorderRadius
+                              .zero, // Set borderRadius to zero for sharp edges
+                        ),
+                        side: const BorderSide(color: Colors.black, width: 1.0),
+                      ),
+                      onPressed: _saveImage,
+                      child: Text('Save'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else {
+      content = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 450,
+              width: 350,
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 222, 255, 224),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 70),
+                    child: Container(
+                      height: 100,
+                      width: 150,
+                      color: Color.fromARGB(255, 222, 255, 224),
+                      child: Visibility(
+                        visible: isVisible,
+                        child: const Text(
+                          'Add at-least a widget to save',
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: SizedBox(
+                      height: 50,
+                      width: 100,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 167, 254, 167),
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            // Use RoundedRectangleBorder for sharp corners
+                            borderRadius: BorderRadius
+                                .zero, // Set borderRadius to zero for sharp edges
+                          ),
+                          side:
+                              const BorderSide(color: Colors.black, width: 1.0),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isVisible = true;
+                          });
+                          print('on press Working');
+                          print('Value of isVisible: $isVisible');
+                        },
+                        child: Text('Save'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(32.0),
+              child: SizedBox(
+                width: 200,
+                height: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 1),
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SelectPage(),
+                        ),
+                      );
                     },
                     backgroundColor: const Color.fromARGB(255, 177, 224, 179),
                     foregroundColor: Colors.black,
@@ -338,7 +516,7 @@ class _DisplayWidgetState extends State<DisplayWidget> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Display Widgets'),
+        title: Text('Assignment App'),
       ),
       body: Center(
         child: content,
@@ -354,7 +532,13 @@ class _DisplayWidgetState extends State<DisplayWidget> {
         'text info': textValue,
       }).then((value) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sucessfully added')),
+          SnackBar(
+            content: Text(
+              'Sucessfully added',
+              style: TextStyle(color: Color.fromARGB(255, 61, 115, 63)),
+            ),
+            backgroundColor: const Color.fromARGB(255, 173, 255, 176),
+          ),
         );
       }).catchError((error) {
         print('Failed to add data: $error');

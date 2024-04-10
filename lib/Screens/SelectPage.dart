@@ -20,47 +20,64 @@ class _SelectPageState extends State<SelectPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Color.fromARGB(255, 210, 237, 211),
+        backgroundColor: Color.fromARGB(255, 218, 239, 219),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ...options.keys.map((String option) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Container(
-                    width: 250,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Set white background color
-                      borderRadius: BorderRadius.circular(
-                          8), // Optional: Add border radius
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: options[option],
-                          onChanged: (bool? value) {
-                            setState(() {
-                              options[option] = value!;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(option,
-                              style: const TextStyle(
-                                fontSize: 20,
-                              )),
-                        ),
-                      ],
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        options[option] = !options[option]!;
+                      });
+                    },
+                    child: Container(
+                      width: 250,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(
+                            255, 203, 202, 202), // Set white background color
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 0, right: 10),
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              color: Colors.white,
+                              child: Container(
+                                height: 50,
+                                width: 250,
+                                decoration: BoxDecoration(),
+                                child: Center(
+                                  child: Container(
+                                    width: 25,
+                                    height: 25,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: options[option]!
+                                          ? const Color.fromARGB(
+                                              255, 92, 165, 95)
+                                          : Color.fromARGB(255, 203, 202, 202),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(option,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
